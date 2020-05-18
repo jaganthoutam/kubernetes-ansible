@@ -29,6 +29,12 @@
     dest: "{{ kube_addon_dir }}/metrics-server.yaml"
   when: metrics_server
 
+- name: Copy nginx-ingress.yaml.j2
+  template:
+    src: nginx-ingress.yaml.j2
+    dest: "{{ kube_addon_dir }}/nginx-ingress.yaml"
+  when: metrics_server
+  
 - name: Create kube-proxy
   shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/kube-proxy.yaml"
   delegate_to: "{{ groups['masters'][0] }}"
@@ -49,6 +55,12 @@
 
 - name: Create metrics-server
   shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/metrics-server.yaml"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  when: metrics_server
+
+- name: Create nginx-ingress
+  shell: "kubectl apply --kubeconfig={{ kubeadminconfig }} -f {{ kube_addon_dir }}/nginx-ingress.yaml"
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
   when: metrics_server
