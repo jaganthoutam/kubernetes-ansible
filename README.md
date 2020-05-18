@@ -49,8 +49,73 @@ Download the Kubernetes-Ansible playbook and set up variable according to need i
 git clone https://github.com/pawankkamboj/kubernetes-ansible.git
 cd kubernetes-ansible
 cp group_vars/all.yml.example group_vars/all.yml
-ansible-playbook -i inventory cluster.yml
+cp inventory.example inventory
+ansible-playbook -i inventory -b -u root cluster.yml 
 ```
+ * Kubectl commands should be run on Master nodes only.
+
+After magic happened Login to one of the master node and we should test Kubernetes cluster installation by executing `kubectl --kubeconfig=/etc/kubernetes/kubeadminconfig get nodes'` command.
+After a while (5 mins or more) we have to see this result:
+```
+NAME          STATUS     ROLES    AGE    VERSION
+gt-crc-s157   NotReady   <none>   106m   v1.18.1
+gt-crc-s158   NotReady   <none>   48m    v1.18.1
+gt-crc-s159   NotReady   <none>   48m    v1.18.1
+gt-crc-s170   NotReady   <none>   47m    v1.18.1
+gt-crc-s171   NotReady   <none>   47m    v1.18.1
+```
+It is showing `NotReady` because kubernetes network plugin is not deployed.
+
+We are almost there, only addons left.
+```
+ansible-playbook -i inventory -b -u root addon.yml
+```
+Test result of execution with `kubectl --kubeconfig=/etc/kubernetes/kubeadminconfig get pods -n kube-system'` command.
+```
+NAME                                     READY   STATUS    RESTARTS   AGE
+coredns-54f546d556-6tqfv                 1/1     Running   0          154m
+etcd-gt-crc-s157                         1/1     Running   0          3h36m
+etcd-gt-crc-s158                         1/1     Running   0          158m
+etcd-gt-crc-s159                         1/1     Running   0          158m
+kube-apiserver-gt-crc-s157               1/1     Running   0          3h36m
+kube-apiserver-gt-crc-s158               1/1     Running   0          158m
+kube-apiserver-gt-crc-s159               1/1     Running   0          158m
+kube-controller-manager-gt-crc-s157      1/1     Running   0          3h37m
+kube-controller-manager-gt-crc-s158      1/1     Running   0          158m
+kube-controller-manager-gt-crc-s159      1/1     Running   0          157m
+kube-flannel-ds-amd64-fscwr              1/1     Running   0          65m
+kube-flannel-ds-amd64-hz9cr              1/1     Running   0          65m
+kube-flannel-ds-amd64-l7rxl              1/1     Running   0          65m
+kube-flannel-ds-amd64-rw762              1/1     Running   0          65m
+kube-flannel-ds-amd64-sjw9x              1/1     Running   0          65m
+kube-proxy-8fbgm                         1/1     Running   0          154m
+kube-proxy-8hvmv                         1/1     Running   0          154m
+kube-proxy-gwtcp                         1/1     Running   0          154m
+kube-proxy-m8s24                         1/1     Running   0          154m
+kube-proxy-rw6wn                         1/1     Running   0          154m
+kube-scheduler-gt-crc-s157               1/1     Running   0          3h37m
+kube-scheduler-gt-crc-s158               1/1     Running   0          158m
+kube-scheduler-gt-crc-s159               1/1     Running   0          158m
+metrics-server-v0.3.6-8448866767-qv9nr   1/1     Running   0          154m
+
+```
+ # setup KUBECONFIG 
+ Run below commands on all the server
+ ```bash
+export KUBECONFIG=/etc/kubernetes/kubeadminconfig
+ 
+[root@GT-CRC-S157 net.d]# kubectl get no
+NAME          STATUS   ROLES    AGE     VERSION
+gt-crc-s157   Ready    <none>   3h41m   v1.18.1
+gt-crc-s158   Ready    <none>   162m    v1.18.1
+gt-crc-s159   Ready    <none>   162m    v1.18.1
+gt-crc-s170   Ready    <none>   161m    v1.18.1
+gt-crc-s171   Ready    <none>   161m    v1.18.1
+ 
+ ```
+ 
+ 
+
 
 Ansible roles
 - yum-proxy - installs Squid proxy server
