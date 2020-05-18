@@ -12,6 +12,10 @@
     state: latest
     update_cache: yes
 
+- name: Install containerd.io
+  shell: yum install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm --nogpgcheck  
+  become: yes
+
 - name: Install Docker repo on CentOS
   command: "yum-config-manager --add-repo {{ docker_repo | default('https://download.docker.com/linux/centos/docker-ce.repo') }}"
   when: ansible_distribution == "CentOS"
